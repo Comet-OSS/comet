@@ -23,20 +23,28 @@ return function(app: _types.App)
 
 	-- Build groups
 	do
-		for group, tabs in subitems do
-			local section = window:Section({
-				Title = group,
-				Disclosure = false,
+		local function tab(root, tabName, tabInfo)
+			local tab = root:Tab({
+				Selected = tabInfo.Selected,
+				Title = tabName,
+				Icon = tabInfo.Icon,
 			})
 
-			for tabName, tabInfo in tabs do
-				local tab = section:Tab({
-					Selected = tabInfo.Selected,
-					Title = tabName,
-					Icon = tabInfo.Icon,
+			tabInfo.Build(cascade, app, window, tab)
+		end
+
+		for group, tabs in subitems do
+			if tabs.Build then
+				tab(window, group, tabs)
+			else
+				local section = window:Section({
+					Title = group,
+					Disclosure = false,
 				})
 
-				tabInfo.Build(cascade, app, window, tab)
+				for tabName, tabInfo in tabs do
+					tab(section, tabName, tabInfo)
+				end
 			end
 		end
 	end

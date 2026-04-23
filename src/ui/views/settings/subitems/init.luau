@@ -1,17 +1,19 @@
+--// Imports
 local cascade = require("@packages/cascade")
 
+--// Publish
 return {
-	Appearance = {
-		Window = {
+    ["Personalization"] = {
+        Appearance = {
             Selected = true,
-			Icon = cascade.Symbols.sidebarLeft,
-			Build = require("@self/Appearance/window"),
-		},
-	},
-	General = {
-		Shortcuts = {
-			Icon = cascade.Symbols.command,
-			Build = require("@self/General/shortcuts"),
-		},
-	},
+            Icon = cascade.Symbols.paintpalette,
+            Build = require("@self/General/appearance"),
+        },
+    },
+    ["System"] = {
+        Shortcuts = {
+            Icon = cascade.Symbols.command,
+            Build = require("@self/General/shortcuts"),
+        },
+    },
 }
