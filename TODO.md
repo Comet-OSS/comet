@@ -22,6 +22,7 @@ We need more default commands. More will be added to the list as it grows
 - Noclip
 - Walkspeed <Speed: number?>
 - JumpPower <Speed: number?>
+- Waypoint Editor & Waypoint commands
 
 ## (?) Argument support
 
@@ -40,3 +41,12 @@ Anyways continuing on n1, a good reference is discord slash commands, if they re
 ## Remote Spy, Instance spy to extend palette instance search, and more
 
 This will eventually need to be added.
+
+## Shortcut adder for commands
+
+- in shortcut tab, add a plus button to add shortcuts to a command, it brings up the palette with only commands and adds a new entry to the shortcut tab's list.
+- At the top of the shortcut tab before any of the other shortcuts add command shortcut editor row and then "Open" for editor open. This will use page routing and open a new page to edit command shortcuts using the behavior above.
+
+- This might be a conflict tho so i dont really know. since commands and shortcuts are different yk? like what if a command already had a shortcut assigned, then does it go in the default shortcut list or the keybind editor. this is odd.
+
+- It might be able to be solved with a new pagesection dedicated to stuff that wasnt listed as "Custom shortcuts"
