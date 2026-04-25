@@ -8,6 +8,8 @@ declare __COMPOSER: {
 }
 
 declare _P: {
+    shared: {any: any},
+    
     target: string,
     tag: string,
     generatedAt: string

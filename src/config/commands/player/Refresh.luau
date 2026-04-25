@@ -2,7 +2,7 @@
 local utility = require("@core/utility")
 
 --// Publish
-return function(_app)
+return function(self)
 	return {
 		Title = "Refresh",
 		Icon = "",

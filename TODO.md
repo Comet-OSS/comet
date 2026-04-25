@@ -26,7 +26,7 @@ We need more default commands. More will be added to the list as it grows
 
 ## (?) Argument support
 
-n1 This should be clean and native feeling. It shouldnt just be extra text it should auto append a field when you press enter on a command requiring additional arguments.
+n1 This should be clean and native feeling. It shouldnt just be extra text it should auto append a field when you press enter on a command requiring additional arguments. or press space which will also do the same thing as enter and will pre-enter all the required fields. non optional fields (as stated a bit below) will not be auto added
 
 ---
 

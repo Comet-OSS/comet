@@ -7,6 +7,7 @@ local storage = require("@modules/storage")
 
 local themes = require("@ui/themes")
 local components = require("@ui/components")
+local views = require("@ui/views")
 
 local keybind = require("@modules/keybind")
 local instances = require("@modules/instances")
@@ -14,6 +15,7 @@ local services = require("@modules/services")
 
 local keybinds = require("@config/keybinds")
 local commands = require("@config/commands")
+local statusCodes = require("@config/statusCodes")
 
 --// References
 local cbD = utility.cbD
@@ -32,6 +34,10 @@ type CommandUsageState = {
 }
 
 --// State
+local comet = {
+	Views = {},
+}
+
 local currentResults: { RenderedCommand } = {}
 local selectedIndex = 1
 local isRendering = false
@@ -45,7 +51,8 @@ local persistedState = storage.LoadJson("state.json", {
 })
 local commandUsageState: CommandUsageState = persistedState.CommandUsage
 
-if type(commandUsageState) ~= "table"
+if
+	type(commandUsageState) ~= "table"
 	or type(commandUsageState.UsageCounts) ~= "table"
 	or type(commandUsageState.Recent) ~= "table"
 	or type(commandUsageState.QueryPreferences) ~= "table"
@@ -364,6 +371,7 @@ local function renderCommands(query: string, isCommandSearch: boolean)
 					Icon = cmd.Icon,
 					Shortcut = cmd.Shortcut,
 					IsRecent = getRecentIndex(cmd.Title) ~= nil,
+					Group = cmd.Group or "Other",
 
 					OnTrigger = function()
 						rememberCommandChoice(cmd.Title, query)
@@ -421,6 +429,7 @@ local function renderCommands(query: string, isCommandSearch: boolean)
 
 		local groupedEntries = {}
 		local layoutOrder = 1
+
 		if #recentMatches > 0 then
 			table.insert(groupedEntries, { Type = "Header", Title = "Recently Used", LayoutOrder = layoutOrder })
 			layoutOrder += 1
@@ -429,14 +438,29 @@ local function renderCommands(query: string, isCommandSearch: boolean)
 				layoutOrder += 1
 			end
 		end
-		if #otherMatches > 0 then
-			if #recentMatches > 0 then
-				table.insert(groupedEntries, { Type = "Header", Title = "All Commands", LayoutOrder = layoutOrder })
+
+		local groups = {}
+		for _, data in ipairs(rawMatches) do
+			local groupName = data.Group or "Other"
+			groups[groupName] = groups[groupName] or {}
+			table.insert(groups[groupName], data)
+		end
+
+		local groupNames = {}
+		for name, _ in pairs(groups) do
+			table.insert(groupNames, name)
+		end
+		table.sort(groupNames)
+
+		for _, gname in ipairs(groupNames) do
+			local items = groups[gname]
+			if items and #items > 0 then
+				table.insert(groupedEntries, { Type = "Header", Title = gname, LayoutOrder = layoutOrder })
 				layoutOrder += 1
-			end
-			for _, data in ipairs(otherMatches) do
-				table.insert(groupedEntries, { Type = "Item", Data = data, LayoutOrder = layoutOrder })
-				layoutOrder += 1
+				for _, data in ipairs(items) do
+					table.insert(groupedEntries, { Type = "Item", Data = data, LayoutOrder = layoutOrder })
+					layoutOrder += 1
+				end
 			end
 		end
 
@@ -549,7 +573,12 @@ cbD(function()
 end)
 
 components()
-commands(app)
+
+comet.Views.Settings = views.settings(app)
+comet.App = app
+comet.Cascade = cascade
+
+commands(comet)
 loadStatePersistence()
 
 commandPalette = app:CommandPalette({
@@ -579,17 +608,44 @@ services.UserInputService.InputBegan:Connect(function(key)
 		applySelection()
 	end
 end)
+
 commandPalette.Structures.SearchInput.FocusLost:Connect(function(enterPressed)
 	if enterPressed then
 		local selected = currentResults[selectedIndex]
 
 		if selected then
-			selected.Data.OnTrigger()
+			local success, result = pcall(selected.Data.OnTrigger)
+			local codeLabel = result
+				and (result.status and (statusCodes.OnTrigger[result.status] or tostring(result.status)))
+
+			if not success then
+				app:Notification({
+					App = "Comet",
+
+					Title = `{selected.Data.Title}`,
+					Subtitle = `Error running command: {result}`,
+					Icon = cascade.Symbols.command,
+
+					Duration = 5,
+				})
+			elseif result and result.message then
+				app:Notification({
+					App = "Comet",
+
+					Title = `{selected.Data.Title}`,
+					Subtitle = codeLabel and (codeLabel .. ": " .. (result.message or "Error"))
+						or (result.message or "Error running command"),
+					Icon = cascade.Symbols.command,
+
+					Duration = 5,
+				})
+			end
 		end
 	else
 		commandPalette.Visible = false
 	end
 end)
+
 commandPalette.Structures.SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
 	local text = commandPalette.Structures.SearchInput.Text
 
@@ -619,6 +675,27 @@ do
 			toggleCommandBar(">")
 		end
 	end)
+end
+
+do
+	local showInitGreeting = storage.getUiFlag("ShowInitGreeting", true)
+	if showInitGreeting then
+		local paletteOpen = {}
+
+		for _, v in keybinds.Palette.Command.Value do
+			table.insert(paletteOpen, keybind.enumToPhysical(v))
+		end
+
+		app:Notification({
+			App = "Comet",
+
+			Title = `Palette loaded`,
+			Subtitle = `The command palette has loaded. Press \`{table.concat(paletteOpen, " + ")}\` to use it`,
+			Icon = cascade.Symbols.command,
+
+			Duration = 10,
+		})
+	end
 end
 
 return 0

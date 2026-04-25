@@ -26,6 +26,22 @@ local function writeState(state: { [string]: any }): boolean
 	return storage.SaveJson(STATE_FILE, state)
 end
 
+local function shouldAutosave(): boolean
+	local persisted = readState()
+	if type(persisted) ~= "table" then
+		return true
+	end
+	local flags = persisted.UiFlags
+	if type(flags) ~= "table" then
+		return true
+	end
+	local v = flags.AutoSaveConfig
+	if v == nil then
+		return true
+	end
+	return v
+end
+
 local function normalizeStateKeys(stateValue: any): { string }
 	if type(stateValue) == "string" then
 		return { stateValue }
@@ -162,7 +178,13 @@ function storage.uiFlag(flag: string, component: any, stateValue: any?): any
 				flags[flag] = data
 			end
 
-			writeState(state)
+			if flag == "AutoSaveConfig" then
+				writeState(state)
+			else
+				if shouldAutosave() then
+					writeState(state)
+				end
+			end
 		end
 	end
 

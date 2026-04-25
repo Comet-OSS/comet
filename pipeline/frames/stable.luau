@@ -16,6 +16,7 @@
 --]]
 
 _P = {
+    shared = {},
     generatedAt = __COMPOSER.Insert(__COMPOSER.genDate),
     target = __COMPOSER.Insert(__COMPOSER.cfg),
     tag = __COMPOSER.Insert(__COMPOSER.vers),

@@ -23,6 +23,7 @@ local binder = cascade.Binder
 return function(self, properties: any)
 	properties = properties or {}
 	properties.IsSelected = properties.IsSelected == true
+	properties.IsHovered = properties.IsHovered == true
 
 	local structures = ui(self, properties)
 
@@ -105,6 +106,37 @@ return function(self, properties: any)
 				structures.Shortcut.TextTransparency = self.Theme.Text.Secondary[2].Value
 			end
 		end,
+		IsHovered = function(val)
+			local commandItemTheme = self.Theme.Controls.CommandItem
+			local hover = commandItemTheme.Hover
+
+			if properties.IsSelected then
+				return
+			end
+
+			if val then
+				structures.Body.BackgroundColor3 = hover[1].Value
+				structures.Body.BackgroundTransparency = hover[2].Value
+				structures.Title.TextColor3 = commandItemTheme.TextDefault[1].Value
+				structures.Title.TextTransparency = commandItemTheme.TextDefault[2].Value
+				structures.Icon.ImageColor3 = commandItemTheme.IconDefault[1].Value
+				structures.Icon.ImageTransparency = commandItemTheme.IconDefault[2].Value
+				structures.Shortcut.TextColor3 = self.Theme.Text.Secondary[1].Value
+				structures.Shortcut.TextTransparency = self.Theme.Text.Secondary[2].Value
+			else
+				if properties.IsSelected then
+					return
+				end
+				structures.Body.BackgroundColor3 = commandItemTheme.Background[1].Value
+				structures.Body.BackgroundTransparency = commandItemTheme.Background[2].Value
+				structures.Title.TextColor3 = commandItemTheme.TextDefault[1].Value
+				structures.Title.TextTransparency = commandItemTheme.TextDefault[2].Value
+				structures.Icon.ImageColor3 = commandItemTheme.IconDefault[1].Value
+				structures.Icon.ImageTransparency = commandItemTheme.IconDefault[2].Value
+				structures.Shortcut.TextColor3 = self.Theme.Text.Secondary[1].Value
+				structures.Shortcut.TextTransparency = self.Theme.Text.Secondary[2].Value
+			end
+		end,
 	}, structures.Body)
 
 	object.Type = "PaletteItem"
@@ -117,8 +149,19 @@ return function(self, properties: any)
 	end)
 
 	structures.Body.MouseEnter:Connect(function()
-		if object.OnFocused then
-			pcall(object.OnFocused)
+		object.IsHovered = true
+		if object.OnHover then
+			pcall(object.OnHover)
+		end
+	end)
+
+	structures.Body.MouseLeave:Connect(function()
+		object.IsHovered = false
+		if object.OnUnfocused then
+			pcall(object.OnUnfocused)
+		end
+		if object.OnUnhover then
+			pcall(object.OnUnhover)
 		end
 	end)
 

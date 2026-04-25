@@ -1,15 +1,13 @@
---// Publish
-return function(app)
+return function(self)
 	--// Imports
-	local views = require("@ui/views")
 	local keybinds = require("@config/keybinds")
 
 	--// Variables
-	local window = views.settings(app)
+	local window = self.Views.Settings
 	
-	window.Visible = false
-
-	local data = {
+	--// Publish
+	return {
+		Shortcut = keybinds.Settings.Open,
 		Title = "Settings",
 		Icon = "",
 		OnTrigger = function()
@@ -20,8 +18,4 @@ return function(app)
 			end
 		end,
 	}
-
-	data.Shortcut = keybinds.Settings.Open
-
-	return data
 end

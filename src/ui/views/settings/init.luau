@@ -1,8 +1,8 @@
-local _types = require("@packages/Cascade/types")
+local _types = require("@packages/cascade/types")
 
 return function(app: _types.App)
 	--// Imports
-	local cascade = require("@packages/Cascade")
+	local cascade = require("@packages/cascade")
 
 	local keybind = require("@modules/keybind")
 	local services = require("@modules/services")
@@ -20,6 +20,12 @@ return function(app: _types.App)
 		Size = UserInputService.TouchEnabled and UDim2.fromOffset(550, 325) or UDim2.fromOffset(850, 530),
 		UIBlur = false,
 	})
+
+	-- Setup
+	do
+		window.Visible = false
+		window.CanExit = false
+	end
 
 	-- Build groups
 	do
