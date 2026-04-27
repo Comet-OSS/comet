@@ -376,7 +376,7 @@ local function renderCommands(query: string, isCommandSearch: boolean)
 					OnTrigger = function()
 						rememberCommandChoice(cmd.Title, query)
 						commandPalette.Visible = false
-						cmd.OnTrigger(cmd.Super)
+						cmd.OnTrigger(cmd, cmd.Super)
 					end,
 				})
 			end
@@ -644,6 +644,8 @@ comet.Views.Settings = views.settings(app)
 comet.App = app
 comet.Cascade = cascade
 
+_P.shared.App = app
+
 commands(comet)
 loadStatePersistence()
 
@@ -683,40 +685,20 @@ commandPalette.Structures.ResultsContainer.MouseLeave:Connect(function()
 end)
 
 commandPalette.Structures.SearchInput.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        local selected = currentResults[selectedIndex]
-        if selected then
-            local success, result = pcall(selected.Data.OnTrigger)
-            local codeLabel = result
-                and (result.status and (statusCodes.OnTrigger[result.status] or tostring(result.status)))
-            if not success then
-                app:Notification({
-                    App = "Comet",
-                    Title = `{selected.Data.Title}`,
-                    Subtitle = `Error running command: {result}`,
-                    Icon = cascade.Symbols.command,
-                    Duration = 5,
-                })
-            elseif result and result.message then
-                app:Notification({
-                    App = "Comet",
-                    Title = `{selected.Data.Title}`,
-                    Subtitle = codeLabel and (codeLabel .. ": " .. (result.message or "Error"))
-                        or (result.message or "Error running command"),
-                    Icon = cascade.Symbols.command,
-                    Duration = 5,
-                })
-            end
-        end
-    else
-        if isHoveringResults then
-            task.defer(function()
-                commandPalette.Structures.SearchInput:CaptureFocus()
-            end)
-        else
-            commandPalette.Visible = false
-        end
-    end
+	if enterPressed then
+		local selected = currentResults[selectedIndex]
+		if selected then
+			selected.Data.OnTrigger(selected.Data, selected.Data.Super)
+		end
+	else
+		if isHoveringResults then
+			task.defer(function()
+				commandPalette.Structures.SearchInput:CaptureFocus()
+			end)
+		else
+			commandPalette.Visible = false
+		end
+	end
 end)
 
 commandPalette.Structures.SearchInput:GetPropertyChangedSignal("Text"):Connect(function()

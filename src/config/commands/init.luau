@@ -9,6 +9,8 @@ local commands = {
 	Player = {
 		require("@self/player/Refresh"),
 		require("@self/player/Reset"),
+		require("@self/player/Noclip"),
+		require("@self/player/Fling"),
 	},
 	Game = {
 		require("@self/game/Rejoin"),
@@ -59,7 +61,9 @@ local function reg(self, commandModule, groupName, super)
         command.Title = `{super.Title}: {command.Title}`
     end
 
-    commandFramework.Register(command, super)
+	if type(command) == "table" and typeof(command.OnTrigger) == "function" then
+		commandFramework.Register(command, super)
+	end
 
 	return command
 end
@@ -84,7 +88,7 @@ return function(self)
 					continue
 				end
 
-				for _, invocator in registeredCommand.Invocators do
+				for _, invocator in pairs(registeredCommand.Invocators) do
                     reg(self, invocator, groupName, registeredCommand)
 				end
 			end

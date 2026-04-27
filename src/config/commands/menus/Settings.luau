@@ -27,7 +27,7 @@ return function(self)
 		for tabName, tab in utility.safePath(_P, "shared.Views.Settings.Tabs") do
 			command.Invocators[tabName] = {
 				Title = tabName,
-				OnTrigger = function(super)
+				OnTrigger = function(self, super)
 					super.OnTrigger()
 					tab.Selected = true
 				end,
