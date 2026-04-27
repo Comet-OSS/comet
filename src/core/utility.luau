@@ -27,6 +27,25 @@ utility.FindFirstChildOfClass = utility.index(game, "FindFirstChildOfClass")
 utility.WaitForChild = utility.index(game, "WaitForChild")
 
 --// Public Methods
+function utility.safePath(root: {[any]: any}, path: string, makeMissingDirs: boolean?): any
+	for key in path:gmatch("[^.]+") do
+		if type(root) ~= "table" then
+			return nil
+		end
+
+		if root[key] == nil then
+			if makeMissingDirs then
+				root[key] = {}
+			else
+				return nil
+			end
+		end
+		
+		root = root[key]
+	end
+
+	return root
+end
 
 function utility.printD(...)
 	if _P.target == "Debug" then
@@ -130,5 +149,6 @@ function utility.ProcessTable(tbl: { any }, fn: (any) -> any, concatStr: string?
 
 	return result
 end
+
 
 return utility

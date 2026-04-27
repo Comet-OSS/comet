@@ -1,5 +1,6 @@
 --// Imports
 local cascade = require("@packages/cascade")
+local topbarPlus = require("@packages/topbarPlus")
 
 local utility = require("@core/utility")
 local commandFramework = require("@core/commandFramework")
@@ -33,14 +34,10 @@ type CommandUsageState = {
 	QueryPreferences: { [string]: { [string]: number } },
 }
 
---// State
+--// Variables
 local comet = {
 	Views = {},
 }
-
-local currentResults: { RenderedCommand } = {}
-local selectedIndex = 1
-local isRendering = false
 local persistedState = storage.LoadJson("state.json", {
 	CommandUsage = {
 		UsageCounts = {},
@@ -49,6 +46,12 @@ local persistedState = storage.LoadJson("state.json", {
 	},
 	Keybinds = {},
 })
+
+local commandPalette: any
+local isHoveringResults = false
+local currentResults: { RenderedCommand } = {}
+local selectedIndex = 1
+local isRendering = false
 local commandUsageState: CommandUsageState = persistedState.CommandUsage
 
 if
@@ -64,6 +67,7 @@ then
 	}
 end
 
+--// Private Methods
 local function normalizeRecent(rawRecent: any): { string }
 	if type(rawRecent) ~= "table" then
 		return {}
@@ -99,9 +103,6 @@ local function normalizeRecent(rawRecent: any): { string }
 end
 
 commandUsageState.Recent = normalizeRecent(commandUsageState.Recent)
-
---// Variables
-local commandPalette: any
 
 local function normalizeTitle(title: string): string
 	return string.lower(string.gsub(title, "^%s*(.-)%s*$", "%1"))
@@ -158,7 +159,6 @@ local function loadStatePersistence()
 	end
 end
 
---// Private Methods
 local function fuzzyMatch(str: string, query: string)
 	if query == "" then
 		return true, str, 0
@@ -376,7 +376,7 @@ local function renderCommands(query: string, isCommandSearch: boolean)
 					OnTrigger = function()
 						rememberCommandChoice(cmd.Title, query)
 						commandPalette.Visible = false
-						cmd.OnTrigger()
+						cmd.OnTrigger(cmd.Super)
 					end,
 				})
 			end
@@ -544,6 +544,59 @@ local app = cascade.New({
 	WindowPill = false,
 })
 
+--// Topbar
+do
+	-- Root
+	do
+		app.TopbarIcon = topbarPlus.new()
+		app.TopbarIcon:setImage(cascade.Symbols.sparkle):setLabel("Comet")
+	end
+
+	-- Search
+	do
+		app.TopbarIcon_Search = topbarPlus.new()
+		app.TopbarIcon_Search:setImage(cascade.Symbols.magnifyingglass):setLabel("Search"):setOrder(1)
+
+		app.TopbarIcon_Search.selected:Connect(function()
+			app.TopbarIcon_Search:deselect()
+			app.TopbarIcon:deselect()
+
+			toggleCommandBar("")
+		end)
+	end
+
+	-- Command
+	do
+		app.TopbarIcon_Command = topbarPlus.new()
+		app.TopbarIcon_Command
+			:setImage(cascade.Symbols.chevronLeftForwardslashChevronRight)
+			:setLabel("Commands")
+			:setOrder(2)
+
+		app.TopbarIcon_Command.selected:Connect(function()
+			app.TopbarIcon_Command:deselect()
+			app.TopbarIcon:deselect()
+
+			toggleCommandBar(">")
+		end)
+	end
+
+	-- Search
+	do
+		app.TopbarIcon_Settings = topbarPlus.new()
+		app.TopbarIcon_Settings:setImage(cascade.Symbols.gearshape):setLabel("Settings"):setOrder(3)
+
+		app.TopbarIcon_Settings.selected:Connect(function()
+			app.TopbarIcon_Settings:deselect()
+			app.TopbarIcon:deselect()
+
+			comet.Views.Settings.Minimized = false
+		end)
+	end
+
+	app.TopbarIcon:setDropdown({ app.TopbarIcon_Search, app.TopbarIcon_Command, app.TopbarIcon_Settings })
+end
+
 local cleanup
 if getgenv then
 	local env = getgenv()
@@ -609,41 +662,43 @@ services.UserInputService.InputBegan:Connect(function(key)
 	end
 end)
 
+commandPalette.Structures.ResultsContainer.MouseEnter:Connect(function()
+    isHoveringResults = true
+end)
+commandPalette.Structures.ResultsContainer.MouseLeave:Connect(function()
+    isHoveringResults = false
+end)
+
 commandPalette.Structures.SearchInput.FocusLost:Connect(function(enterPressed)
-	if enterPressed then
-		local selected = currentResults[selectedIndex]
+    if enterPressed then
+        local selected = currentResults[selectedIndex]
+        if selected then
+            local success, result = pcall(selected.Data.OnTrigger)
+            local codeLabel = result
+                and (result.status and (statusCodes.OnTrigger[result.status] or tostring(result.status)))
 
-		if selected then
-			local success, result = pcall(selected.Data.OnTrigger)
-			local codeLabel = result
-				and (result.status and (statusCodes.OnTrigger[result.status] or tostring(result.status)))
-
-			if not success then
-				app:Notification({
-					App = "Comet",
-
-					Title = `{selected.Data.Title}`,
-					Subtitle = `Error running command: {result}`,
-					Icon = cascade.Symbols.command,
-
-					Duration = 5,
-				})
-			elseif result and result.message then
-				app:Notification({
-					App = "Comet",
-
-					Title = `{selected.Data.Title}`,
-					Subtitle = codeLabel and (codeLabel .. ": " .. (result.message or "Error"))
-						or (result.message or "Error running command"),
-					Icon = cascade.Symbols.command,
-
-					Duration = 5,
-				})
-			end
-		end
-	else
-		commandPalette.Visible = false
-	end
+            if not success then
+                app:Notification({
+                    App = "Comet",
+                    Title = `{selected.Data.Title}`,
+                    Subtitle = `Error running command: {result}`,
+                    Icon = cascade.Symbols.command,
+                    Duration = 5,
+                })
+            elseif result and result.message then
+                app:Notification({
+                    App = "Comet",
+                    Title = `{selected.Data.Title}`,
+                    Subtitle = codeLabel and (codeLabel .. ": " .. (result.message or "Error"))
+                        or (result.message or "Error running command"),
+                    Icon = cascade.Symbols.command,
+                    Duration = 5,
+                })
+            end
+        end
+    elseif not isHoveringResults then
+        commandPalette.Visible = false
+    end
 end)
 
 commandPalette.Structures.SearchInput:GetPropertyChangedSignal("Text"):Connect(function()

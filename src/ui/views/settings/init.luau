@@ -4,6 +4,8 @@ return function(app: _types.App)
 	--// Imports
 	local cascade = require("@packages/cascade")
 
+	local utility = require("@core/utility")
+
 	local keybind = require("@modules/keybind")
 	local services = require("@modules/services")
 
@@ -30,18 +32,21 @@ return function(app: _types.App)
 	-- Build groups
 	do
 		local function tab(root, tabName, tabInfo)
+			local sharedTabs = utility.safePath(_P, "shared.Views.Settings.Tabs", true)
 			local tab = root:Tab({
 				Selected = tabInfo.Selected,
 				Title = tabName,
 				Icon = tabInfo.Icon,
 			})
-
+			
+			sharedTabs[tabName] = tab
 			tabInfo.Build(cascade, app, window, tab)
 		end
 
 		for group, tabs in subitems do
 			if tabs.Build then
 				tab(window, group, tabs)
+
 			else
 				local section = window:Section({
 					Title = group,

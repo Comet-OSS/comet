@@ -1,5 +1,4 @@
 --!native
---!strict
 
 --// Types
 export type Command = {
@@ -14,7 +13,7 @@ local registry: { Command } = {}
 --// Module
 local Commands = {}
 
-function Commands.Register(command: Command)
+function Commands.Register(command: Command, super: any?)
 	if typeof(command) == "function" then
 		error("Commands.Register expected a command table, received a function. Make sure command modules return a table (or a function that returns a table) and that caller invoked it with app.")
 	end
@@ -24,8 +23,11 @@ function Commands.Register(command: Command)
 	end
 
 	if typeof(command.OnTrigger) ~= "function" then
-		warn(("Command '%s' has invalid OnTrigger (type=%s) — replacing with no-op"):format(tostring(command.Title), typeof(command.OnTrigger)))
-		command.OnTrigger = function() end
+		warn(("Command '%s' has invalid OnTrigger (type=%s)"):format(tostring(command.Title), typeof(command.OnTrigger)))
+	end
+
+	if super then
+		command.Super = super
 	end
 
 	table.insert(registry, command)

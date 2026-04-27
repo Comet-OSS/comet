@@ -12,6 +12,8 @@ return function(self)
 					message = "The executor does not have `setclipboard`"
 				}
 			end
+
+			return
 		end,
 	}
 end
