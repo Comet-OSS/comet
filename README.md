@@ -1,5 +1,3 @@
-<!-->
-
 # Comet
 
 > [!WARNING]
