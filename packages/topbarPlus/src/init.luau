@@ -76,6 +76,11 @@ Icon.isOldTopbar = false -- Logic has been moved to Container
 Icon.iconsDictionary = iconsDict
 Icon.insetHeightChanged = Signal.new()
 Icon.container = require("@self/Elements/Container")(Icon)
+-- Optional integration point: if a different TopbarPlus-like module already
+-- created holders in CoreGui/PlayerGui, Overflow can populate these so that
+-- icons render inside the host topbar instead of a private container.
+Icon.topbarHoldersOverride = nil
+Icon.topbarPrimaryScreenGuiOverride = nil
 Icon.topbarEnabled = true
 Icon.iconAdded = Signal.new()
 Icon.iconRemoved = Signal.new()
@@ -749,14 +754,25 @@ function Icon:align(leftCenterOrRight, isFromParentIcon)
 	if direction ~= "left" and direction ~= "center" and direction ~= "right" then
 		direction = "left"
 	end
-	local screenGui = (direction == "center" and Icon.container.TopbarCentered) or Icon.container.TopbarStandard
-	local holders = screenGui.Holders
 	local finalDirection = string.upper(string.sub(direction, 1, 1))..string.sub(direction, 2)
+	
+	-- If Overflow discovered an existing topbar with compatible holders,
+	-- parent into those holders so we truly merge into the host topbar.
+	local overrideHolders = Icon.topbarHoldersOverride
+	local alignmentHolder
+	local screenGui
+	if overrideHolders and overrideHolders[finalDirection] then
+		alignmentHolder = overrideHolders[finalDirection]
+		screenGui = alignmentHolder:FindFirstAncestorWhichIsA("ScreenGui") or Icon.topbarPrimaryScreenGuiOverride
+	else
+		screenGui = (direction == "center" and Icon.container.TopbarCentered) or Icon.container.TopbarStandard
+		local holders = screenGui.Holders
+		alignmentHolder = holders[finalDirection]
+	end
 	if not isFromParentIcon then
 		self.originalAlignment = finalDirection
 	end
 	local joinedFrame = self.joinedFrame
-	local alignmentHolder = holders[finalDirection]
 	self.screenGui = screenGui
 	self.alignmentHolder = alignmentHolder
 	if not self.isDestroyed then

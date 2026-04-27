@@ -217,8 +217,17 @@ function Utility.clipOutside(icon, instance)
 	local Icon = icon._iconRef
 	local container = Icon.container
 	local function updateScreenGui()
-		local originalScreenGui = originalParent:FindFirstAncestorWhichIsA("ScreenGui")
-		screenGui = if string.match(originalScreenGui.Name, "Clipped") then originalScreenGui else container[originalScreenGui.Name.."Clipped"]
+		local originalScreenGui = originalParent and originalParent:FindFirstAncestorWhichIsA("ScreenGui")
+		if not originalScreenGui then
+			return
+		end
+		if string.match(originalScreenGui.Name, "Clipped") then
+			screenGui = originalScreenGui
+			return
+		end
+		-- If we're integrated into an external topbar, there may be no matching
+		-- "Clipped" ScreenGui in our container. Fall back gracefully.
+		screenGui = container[originalScreenGui.Name.."Clipped"] or originalScreenGui
 		instance.AnchorPoint = Vector2.new(0, 0)
 		instance.Parent = Utility.getClippedContainer(screenGui)
 	end
