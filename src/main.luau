@@ -550,6 +550,7 @@ do
 	do
 		app.TopbarIcon = topbarPlus.new()
 		app.TopbarIcon:setImage(cascade.Symbols.sparkle):setLabel("Comet")
+		app.TopbarIcon:setCaption("Open comet menus")
 	end
 
 	-- Search
@@ -590,6 +591,7 @@ do
 			app.TopbarIcon_Settings:deselect()
 			app.TopbarIcon:deselect()
 
+			comet.Views.Settings.Visible = true
 			comet.Views.Settings.Minimized = false
 		end)
 	end
@@ -619,6 +621,17 @@ if getgenv then
 	end
 
 	env.__myriadCleanup = cleanup
+end
+
+_P.shared.CleanPersistance = function(): boolean
+	local ok = storage.SaveJson("state.json", {})
+	commandUsageState = {
+		UsageCounts = {},
+		Recent = {},
+		QueryPreferences = {},
+	}
+
+	return ok
 end
 
 cbD(function()
@@ -663,10 +676,10 @@ services.UserInputService.InputBegan:Connect(function(key)
 end)
 
 commandPalette.Structures.ResultsContainer.MouseEnter:Connect(function()
-    isHoveringResults = true
+	isHoveringResults = true
 end)
 commandPalette.Structures.ResultsContainer.MouseLeave:Connect(function()
-    isHoveringResults = false
+	isHoveringResults = false
 end)
 
 commandPalette.Structures.SearchInput.FocusLost:Connect(function(enterPressed)
@@ -676,7 +689,6 @@ commandPalette.Structures.SearchInput.FocusLost:Connect(function(enterPressed)
             local success, result = pcall(selected.Data.OnTrigger)
             local codeLabel = result
                 and (result.status and (statusCodes.OnTrigger[result.status] or tostring(result.status)))
-
             if not success then
                 app:Notification({
                     App = "Comet",
@@ -696,8 +708,14 @@ commandPalette.Structures.SearchInput.FocusLost:Connect(function(enterPressed)
                 })
             end
         end
-    elseif not isHoveringResults then
-        commandPalette.Visible = false
+    else
+        if isHoveringResults then
+            task.defer(function()
+                commandPalette.Structures.SearchInput:CaptureFocus()
+            end)
+        else
+            commandPalette.Visible = false
+        end
     end
 end)
 

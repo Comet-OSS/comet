@@ -6,12 +6,12 @@ return function(cascade, app, window, root)
 
     do -- Show init greeting
         local row = form:TitledRow({
-            Title = "Show init greeting",
-            Subtitle = "Show the initial 'Palette loaded' notification when Comet starts.",
+            Title = "Initialization notification",
+            Subtitle = "Shows a notification when Comet has finished setting up",
         })
 
-        storage.uiFlag("ShowInitGreeting", row:Right():Toggle({
-            Value = storage.getUiFlag("ShowInitGreeting", true),
+        storage.uiFlag("InitializationNotification", row:Right():Toggle({
+            Value = true,
         }))
     end
 end

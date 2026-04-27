@@ -1,6 +1,8 @@
 --// Publish
 return function(cascade, app, window, root)
 	local storage = require("@modules/storage")
+	local utility = require("@core/utility")
+	local statusCodes = require("@config/statusCodes")
 
 	local section = root:PageSection({ Title = "Data Controls" })
 
@@ -16,7 +18,7 @@ return function(cascade, app, window, root)
 			storage.uiFlag(
 				"AutoSaveConfig",
 				row:Right():Toggle({
-					Value = storage.getUiFlag("AutoSaveConfig", true),
+					Value = true,
 				})
 			)
 		end
@@ -36,13 +38,26 @@ return function(cascade, app, window, root)
 			Label = "Delete state",
 			State = "Destructive",
 			Pushed = function()
-				local ok = storage.SaveJson("state.json", {})
-				app:Notification({
-					App = "Comet",
-					Title = ok and "Saved config deleted" or "Delete failed",
-					Subtitle = ok and "All persisted configuration removed." or "Unable to delete configuration.",
-					Duration = 4,
-				})
+				local function result(success, sub)
+					app:Notification({
+						App = "Comet",
+						Title = success and "Save state cleared" or "Delete failed",
+						Subtitle = success and "All persisted configuration removed." or sub,
+						Duration = 4,
+					})
+				end
+
+				local path = utility.safePath(_P, "shared.CleanPersistance")
+
+				if not path then
+					result(path, statusCodes._GeneralMessages.MissingInternalPath)
+
+					return
+				else
+					local success = path()
+
+					result(success, "Failed to clear storage persistance")
+				end
 			end,
 		})
 	end
