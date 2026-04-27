@@ -334,7 +334,9 @@ local function applySelection()
 			local canvasPos = scrollFrame.CanvasPosition.Y
 			local winSize = scrollFrame.AbsoluteWindowSize.Y
 
-			if top < canvasPos then
+			if selectedIndex == 1 then
+				scrollFrame.CanvasPosition = Vector2.new(0, 0)
+			elseif top < canvasPos then
 				scrollFrame.CanvasPosition = Vector2.new(0, top)
 			elseif bottom > canvasPos + winSize then
 				scrollFrame.CanvasPosition = Vector2.new(0, bottom - winSize)
@@ -379,7 +381,8 @@ local function startNavHold(keyCode: Enum.KeyCode, delta: number)
 
 		task.wait(behavior.MenuNavHoldDelay)
 
-		while navHoldToken == myToken
+		while
+			navHoldToken == myToken
 			and heldNavKey == keyCode
 			and commandPalette
 			and commandPalette.Visible
@@ -714,7 +717,7 @@ do
 	if behavior.MenuNavHoldDelay == nil then
 		behavior.MenuNavHoldDelay = 0.32
 	end
-	
+
 	if behavior.MenuNavRepeatStartInterval == nil then
 		behavior.MenuNavRepeatStartInterval = 0.085
 	end
