@@ -16,7 +16,6 @@ local services = require("@modules/services")
 
 local keybinds = require("@config/keybinds")
 local commands = require("@config/commands")
-local statusCodes = require("@config/statusCodes")
 
 --// References
 local cbD = utility.cbD
@@ -53,6 +52,9 @@ local currentResults: { RenderedCommand } = {}
 local selectedIndex = 1
 local isRendering = false
 local commandUsageState: CommandUsageState = persistedState.CommandUsage
+
+local heldNavKey: Enum.KeyCode? = nil
+local navHoldToken = 0
 
 if
 	type(commandUsageState) ~= "table"
@@ -341,6 +343,69 @@ local function applySelection()
 	end
 end
 
+local function moveSelection(delta: number)
+	if #currentResults == 0 then
+		return
+	end
+
+	if delta < 0 then
+		selectedIndex = (selectedIndex == 1) and #currentResults or selectedIndex - 1
+	else
+		selectedIndex = (selectedIndex == #currentResults) and 1 or selectedIndex + 1
+	end
+	applySelection()
+end
+
+local function startNavHold(keyCode: Enum.KeyCode, delta: number)
+	heldNavKey = keyCode
+	navHoldToken += 1
+	local myToken = navHoldToken
+
+	local startTime = os.clock()
+	task.spawn(function()
+		local behavior = utility.safePath(_P.shared, "UiBehavior", true)
+		if behavior.MenuNavHoldDelay == nil then
+			behavior.MenuNavHoldDelay = 0.32
+		end
+		if behavior.MenuNavRepeatStartInterval == nil then
+			behavior.MenuNavRepeatStartInterval = 0.085
+		end
+		if behavior.MenuNavRepeatMinInterval == nil then
+			behavior.MenuNavRepeatMinInterval = 0.035
+		end
+		if behavior.MenuNavRepeatAccelPerSecond == nil then
+			behavior.MenuNavRepeatAccelPerSecond = 0.02
+		end
+
+		task.wait(behavior.MenuNavHoldDelay)
+
+		while navHoldToken == myToken
+			and heldNavKey == keyCode
+			and commandPalette
+			and commandPalette.Visible
+			and commandPalette.Structures
+			and commandPalette.Structures.SearchInput
+			and commandPalette.Structures.SearchInput:IsFocused()
+		do
+			local heldFor = os.clock() - startTime
+			local interval = math.max(
+				behavior.MenuNavRepeatMinInterval,
+				behavior.MenuNavRepeatStartInterval - (heldFor * behavior.MenuNavRepeatAccelPerSecond)
+			)
+
+			moveSelection(delta)
+			task.wait(interval)
+		end
+	end)
+end
+
+local function stopNavHold(keyCode: Enum.KeyCode?)
+	if keyCode == nil or heldNavKey == keyCode then
+		heldNavKey = nil
+		navHoldToken += 1
+	end
+end
+
 local function renderCommands(query: string, isCommandSearch: boolean)
 	if isRendering then
 		return
@@ -524,6 +589,9 @@ end
 
 local function toggleCommandBar(initialText: string)
 	commandPalette.Visible = not commandPalette.Visible
+	if not commandPalette.Visible then
+		stopNavHold()
+	end
 
 	if commandPalette.Visible then
 		commandPalette.Text = initialText
@@ -640,6 +708,26 @@ end)
 
 components()
 
+do
+	local behavior = utility.safePath(_P.shared, "UiBehavior", true)
+
+	if behavior.MenuNavHoldDelay == nil then
+		behavior.MenuNavHoldDelay = 0.32
+	end
+	
+	if behavior.MenuNavRepeatStartInterval == nil then
+		behavior.MenuNavRepeatStartInterval = 0.085
+	end
+
+	if behavior.MenuNavRepeatMinInterval == nil then
+		behavior.MenuNavRepeatMinInterval = 0.035
+	end
+
+	if behavior.MenuNavRepeatAccelPerSecond == nil then
+		behavior.MenuNavRepeatAccelPerSecond = 0.02
+	end
+end
+
 comet.Views.Settings = views.settings(app)
 comet.App = app
 comet.Cascade = cascade
@@ -660,6 +748,7 @@ services.UserInputService.InputBegan:Connect(function(key)
 	end
 
 	if key.KeyCode == Enum.KeyCode.Escape then
+		stopNavHold()
 		commandPalette.Visible = false
 		return
 	end
@@ -669,11 +758,21 @@ services.UserInputService.InputBegan:Connect(function(key)
 	end
 
 	if key.KeyCode == Enum.KeyCode.Up then
-		selectedIndex = (selectedIndex == 1) and #currentResults or selectedIndex - 1
-		applySelection()
+		moveSelection(-1)
+		startNavHold(Enum.KeyCode.Up, -1)
 	elseif key.KeyCode == Enum.KeyCode.Down then
-		selectedIndex = (selectedIndex == #currentResults) and 1 or selectedIndex + 1
-		applySelection()
+		moveSelection(1)
+		startNavHold(Enum.KeyCode.Down, 1)
+	end
+end)
+
+services.UserInputService.InputEnded:Connect(function(key)
+	if key.UserInputType ~= Enum.UserInputType.Keyboard then
+		return
+	end
+
+	if key.KeyCode == Enum.KeyCode.Up or key.KeyCode == Enum.KeyCode.Down then
+		stopNavHold(key.KeyCode)
 	end
 end)
 
@@ -685,6 +784,7 @@ commandPalette.Structures.ResultsContainer.MouseLeave:Connect(function()
 end)
 
 commandPalette.Structures.SearchInput.FocusLost:Connect(function(enterPressed)
+	stopNavHold()
 	if enterPressed then
 		local selected = currentResults[selectedIndex]
 		if selected then

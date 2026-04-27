@@ -9,6 +9,10 @@ return {
             Icon = cascade.Symbols.paintpalette,
             Build = require("@self/Personalization/appearance"),
         },
+        Accessibility = {
+            Icon = cascade.Symbols.figure,
+            Build = require("@self/Personalization/accessibility"),
+        },
         ["Data Controls"] = {
             Icon = cascade.Symbols.documentBadgeGearshape,
             Build = require("@self/Personalization/data-controls"),
