@@ -16,10 +16,15 @@
 --]]
 
 _P = {
-    shared = {},
-    generatedAt = __COMPOSER.Insert(__COMPOSER.genDate),
-    target = __COMPOSER.Insert(__COMPOSER.cfg),
-    tag = __COMPOSER.Insert(__COMPOSER.vers),
+	shared = {},
+    
+	generatedAt = __COMPOSER.Insert(__COMPOSER.genDate),
+	target = __COMPOSER.Insert(__COMPOSER.cfg),
+	tag = __COMPOSER.Insert(__COMPOSER.vers),
 }
+
+if not game:IsLoaded() then
+	game.Loaded:Wait()
+end
 
 __COMPOSER.Insert(__COMPOSER.build)

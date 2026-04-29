@@ -1,53 +1,71 @@
 {
-  "deployment": {
-    "github": {
-      "owner": "biggaboy212",
-      "repo": "Comet"
-    }
-  },
+	"deployment": {
+		"github": {
+			"owner": "biggaboy212",
+			"repo": "Comet"
+		}
+	},
 
-  "buildConfigs": [
-    {
-      "name": "Debug",
-      "promptVersion": false,
-      "promptDeploy": false,
-      "frame": "pipeline/frames/stable.luau",
-      "darkluaConfig": "pipeline/darklua/unminified.json",
-      "input": "src/main.luau",
-      "output": "generated/debug/comet.luau"
-    },
-    {
-      "name": "Beta",
-      "promptVersion": true,
-      "promptDeploy": true,
-      "prerelease": true,
-      "frame": "pipeline/frames/stable.luau",
-      "darkluaConfig": "pipeline/darklua/stable.json",
-      "input": "src/main.luau",
-      "output": "generated/beta/comet.luau",
-      "variants": [
-        {
-          "name": "Unminified",
-          "darkluaConfig": "pipeline/darklua/unminified.json",
-          "output": "generated/beta/comet-unminified.luau"
-        }
-      ]
-    },
-    {
-      "name": "Release",
-      "promptVersion": true,
-      "promptDeploy": true,
-      "frame": "pipeline/frames/stable.luau",
-      "darkluaConfig": "pipeline/darklua/stable.json",
-      "input": "src/main.luau",
-      "output": "generated/release/comet.luau",
-      "variants": [
-        {
-          "name": "Unminified",
-          "darkluaConfig": "pipeline/darklua/unminified.json",
-          "output": "generated/release/comet-unminified.luau"
-        }
-      ]
-    }
-  ]
+	"buildConfigs": [
+		{
+			"name": "Debug",
+			"promptVersion": false,
+			"promptDeploy": false,
+			"frame": "pipeline/frames/stable.luau",
+			"darkluaConfig": "pipeline/darklua/unminified.json",
+			"input": "src/main.luau",
+			"output": "generated/debug/comet.luau",
+
+			"pipelineHooks": {
+				"preAllBuilds": {
+					"command": "lune run pipeline/scripts/gen_c-log.luau CHANGELOG.md packages/CHANGELOG.json"
+				}
+			}
+		},
+		{
+			"name": "Beta",
+			"promptVersion": true,
+			"promptDeploy": true,
+			"prerelease": true,
+			"frame": "pipeline/frames/stable.luau",
+			"darkluaConfig": "pipeline/darklua/stable.json",
+			"input": "src/main.luau",
+			"output": "generated/beta/comet.luau",
+
+			"variants": [
+				{
+					"name": "Unminified",
+					"darkluaConfig": "pipeline/darklua/unminified.json",
+					"output": "generated/beta/comet-unminified.luau"
+				}
+			],
+      "pipelineHooks": {
+				"preAllBuilds": {
+					"command": "lune run pipeline/scripts/gen_c-log.luau CHANGELOG.md packages/CHANGELOG.json"
+				}
+			}
+		},
+		{
+			"name": "Release",
+			"promptVersion": true,
+			"promptDeploy": true,
+			"frame": "pipeline/frames/stable.luau",
+			"darkluaConfig": "pipeline/darklua/stable.json",
+			"input": "src/main.luau",
+			"output": "generated/release/comet.luau",
+
+			"variants": [
+				{
+					"name": "Unminified",
+					"darkluaConfig": "pipeline/darklua/unminified.json",
+					"output": "generated/release/comet-unminified.luau"
+				}
+			],
+      "pipelineHooks": {
+				"preAllBuilds": {
+					"command": "lune run pipeline/scripts/gen_c-log.luau CHANGELOG.md packages/CHANGELOG.json"
+				}
+			}
+		}
+	]
 }
