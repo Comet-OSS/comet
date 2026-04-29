@@ -19,8 +19,11 @@ _P = {
 	shared = {},
     
 	generatedAt = __COMPOSER.Insert(__COMPOSER.genDate),
+    prerelease = __COMPOSER.Insert(__COMPOSER.prerelease),
 	target = __COMPOSER.Insert(__COMPOSER.cfg),
+    variant = __COMPOSER.Insert(__COMPOSER.variant),
 	tag = __COMPOSER.Insert(__COMPOSER.vers),
+    outAt = __COMPOSER.Insert(__COMPOSER.output),
 }
 
 if not game:IsLoaded() then
