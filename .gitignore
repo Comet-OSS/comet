@@ -1,6 +1,13 @@
+# Environment variables
 .env
+
+# Build artifacts
 generated/
 
+# Personal configs/folders
 pipeline/.pcmp.local.json
-
 notes/
+
+# Doc artifacts
+site/
+.cache
