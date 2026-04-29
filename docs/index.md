@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /getting-started/
+      link: getting-started/
     - theme: alt
       text: GitHub
       link: https://github.com/Comet-OSS/comet
@@ -19,6 +19,6 @@ hero:
 
 ## Reference
 
-- [Getting Started](/getting-started/)
-- [API](/api/)
-- [Creating Extensions](/creating-extensions/)
+- [Getting Started](getting-started/)
+- [API](api/)
+- [Creating Extensions](creating-extensions/)
