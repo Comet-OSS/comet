@@ -4,14 +4,12 @@
 --!native
 
 --[[
-    @link https://github.com/biggaboy212/Comet
-    @author biggaboy212
+    @link https://github.com/Comet-OSS/Comet
+    @author Comet-OSS
     @repository Comet
+    @license MIT
 
-    @generatedAt __COMPOSER.Insert(__COMPOSER.genDate)
-    @target __COMPOSER.Insert(__COMPOSER.cfg)
-    @tag __COMPOSER.Insert(__COMPOSER.vers)
-
+    Copyright © 2026 Comet-OSS, MIT license.
     This file was automatically @generated with ProCMP, it is not intended for manual editing.
 --]]
 
