@@ -1,45 +1,52 @@
---// Publish
-return function(cascade, app, window, root)
-	local storage = require("@modules/storage")
-	local themes = require("@themes")
+--// Imports
+local _types = require("@packages/cascade/types")
+local storage = require("@modules/storage")
+local themes = require("@themes")
 
-	do -- Appearance
-		local form = root:PageSection({ Title = "Color scheme" }):Form()
+return function(cascade, app, window, root: _types.Page)
+	--// UI
+	do -- Theme
+		local form = root:PageSection({ Title = "Theme" }):Form() :: _types.Form
 
-		do -- Dark mode
+		do -- Appearance
 			local row = form:TitledRow({
-				Title = "Dark mode",
-				Subtitle = "An application appearance setting that uses a dark color palette to provide a comfortable viewing experience tailored for low-light environments.",
-			})
+				Title = "Appearance",
+			}) :: _types.Row
 
-			storage.uiFlag(row.Title, row:Right():Toggle({
-				Value = app.Theme._id == "Dark",
-				ValueChanged = function(self, value: boolean)
-					app.Theme = value and themes.Dark or themes.Light
-				end,
-			}))
+			storage.uiFlag(
+				row.Title,
+				row:Right():RadioButtonGroup({
+					Options = { "Dark", "Light" },
+					Value = app.Theme._id == "Dark" and 1,
+					ValueChanged = function(self, value: number)
+						app.Theme = themes[self.Options[value]]
+					end,
+				})
+			)
 		end
 
-		do -- Application accent
+		do -- Color
 			local row = form:TitledRow({
-				Title = "Application accent",
-				Subtitle = "An application appearance setting that allows you to change the overall accent of the application.",
-			})
+				Title = "Color",
+			}) :: _types.Row
 
 			local flattenedAccents = {}
 			for accent, _ in pairs(cascade.Accents) do
 				table.insert(flattenedAccents, accent)
 			end
 
-			local accentValue = table.find(flattenedAccents, (app.Accent and app.Accent._id) or "Blue")
+			local accentValue = table.find(flattenedAccents, (app.Accent and app.Accent._id) or "Graphite")
 
-			storage.uiFlag(row.Title, row:Right():PopUpButton({
-				Value = accentValue,
-				Options = flattenedAccents,
-				ValueChanged = function(self, value: number)
-					app.Accent = cascade.Accents[self.Options[value]]
-				end,
-			}))
+			storage.uiFlag(
+				row.Title,
+				row:Right():PopUpButton({
+					Value = accentValue,
+					Options = flattenedAccents,
+					ValueChanged = function(self, value: number)
+						app.Accent = cascade.Accents[self.Options[value]]
+					end,
+				})
+			)
 		end
 	end
 end
