@@ -13,6 +13,7 @@ local views = require("@ui/views")
 local keybind = require("@modules/keybind")
 local instances = require("@modules/instances")
 local services = require("@modules/services")
+local search = require("@modules/search")
 
 local keybinds = require("@config/keybinds")
 local commands = require("@config/commands")
@@ -70,45 +71,7 @@ then
 end
 
 --// Private Methods
-local function normalizeRecent(rawRecent: any): { string }
-	if type(rawRecent) ~= "table" then
-		return {}
-	end
-
-	local normalized = {}
-	local numeric = {}
-	for key, value in pairs(rawRecent) do
-		if type(value) == "string" then
-			local numericKey = tonumber(key)
-			if numericKey ~= nil then
-				table.insert(numeric, { Index = numericKey, Value = value })
-			end
-		end
-	end
-
-	table.sort(numeric, function(a, b)
-		return a.Index < b.Index
-	end)
-	for _, entry in ipairs(numeric) do
-		table.insert(normalized, entry.Value)
-	end
-
-	if #normalized == 0 then
-		for _, value in ipairs(rawRecent) do
-			if type(value) == "string" then
-				table.insert(normalized, value)
-			end
-		end
-	end
-
-	return normalized
-end
-
-commandUsageState.Recent = normalizeRecent(commandUsageState.Recent)
-
-local function normalizeTitle(title: string): string
-	return string.lower(string.gsub(title, "^%s*(.-)%s*$", "%1"))
-end
+commandUsageState.Recent = search.NormalizeRecent(commandUsageState.Recent)
 
 local function bindStateSave(keybindSnapshot: { [string]: { [string]: { string | Enum.KeyCode } } })
 	local latestState = storage.LoadJson("state.json", {})
@@ -159,134 +122,6 @@ local function loadStatePersistence()
 			end)
 		end
 	end
-end
-
-local function fuzzyMatch(str: string, query: string)
-	if query == "" then
-		return true, str, 0
-	end
-	local lowerStr = str:lower()
-	local lowerQuery = query:lower()
-
-	local highlighted = ""
-	local score = 0
-	local strIdx = 1
-	local queryIdx = 1
-
-	while strIdx <= #str do
-		local c1 = lowerStr:sub(strIdx, strIdx)
-		if queryIdx <= #query and c1 == lowerQuery:sub(queryIdx, queryIdx) then
-			highlighted ..= '<b><font color="#58a6ff">' .. str:sub(strIdx, strIdx) .. "</font></b>"
-			queryIdx += 1
-			score += 10
-		else
-			highlighted ..= str:sub(strIdx, strIdx)
-		end
-		strIdx += 1
-	end
-
-	if queryIdx > #query then
-		return true, highlighted, score
-	end
-	return false, "", 0
-end
-
-local function startBounds(value: string, query: string): boolean
-	local lowerValue = value:lower()
-	local lowerQuery = query:lower()
-	local start = 1
-
-	while true do
-		local idx = string.find(lowerValue, lowerQuery, start, true)
-		if not idx then
-			return false
-		end
-
-		if idx == 1 then
-			return true
-		end
-
-		local previousChar = lowerValue:sub(idx - 1, idx - 1)
-		if not string.match(previousChar, "[%w]") then
-			return true
-		end
-
-		start = idx + 1
-	end
-end
-
-local function getRecentIndex(commandTitle: string): number?
-	local normalizedTitle = normalizeTitle(commandTitle)
-	for i, title in ipairs(commandUsageState.Recent) do
-		if normalizeTitle(title) == normalizedTitle then
-			return i
-		end
-	end
-
-	return nil
-end
-
-local function queryScore(commandTitle: string, query: string, baseScore: number, includeUsageSignals: boolean?): number
-	local rank = baseScore
-	local lowerTitle = commandTitle:lower()
-	local lowerQuery = query:lower()
-
-	if lowerQuery ~= "" then
-		if string.sub(lowerTitle, 1, #lowerQuery) == lowerQuery then
-			rank += 120
-		elseif startBounds(commandTitle, query) then
-			rank += 80
-		end
-	end
-
-	local matchStart = string.find(lowerTitle, lowerQuery, 1, true)
-	if matchStart then
-		rank += math.max(0, 30 - matchStart)
-	end
-
-	if includeUsageSignals ~= false then
-		local usageCount = commandUsageState.UsageCounts[commandTitle] or 0
-		rank += usageCount * 10
-
-		local recentIndex = getRecentIndex(commandTitle)
-		if recentIndex then
-			rank += math.max(0, 200 - (recentIndex * 15))
-		end
-
-		if lowerQuery ~= "" then
-			local pref = commandUsageState.QueryPreferences[lowerQuery]
-			if pref then
-				rank += (pref[commandTitle] or 0) * 60
-			end
-		end
-	end
-
-	return rank
-end
-
-local function rememberCommandChoice(commandTitle: string, query: string)
-	local normalizedTitle = normalizeTitle(commandTitle)
-	commandUsageState.UsageCounts[commandTitle] = (commandUsageState.UsageCounts[commandTitle] or 0) + 1
-
-	for i = #commandUsageState.Recent, 1, -1 do
-		if normalizeTitle(commandUsageState.Recent[i]) == normalizedTitle then
-			table.remove(commandUsageState.Recent, i)
-		end
-	end
-
-	table.insert(commandUsageState.Recent, 1, commandTitle)
-	while #commandUsageState.Recent > 8 do
-		table.remove(commandUsageState.Recent)
-	end
-
-	local cleanQuery = query:sub(2):lower()
-	if cleanQuery ~= "" then
-		commandUsageState.QueryPreferences[cleanQuery] = commandUsageState.QueryPreferences[cleanQuery] or {}
-		local pref = commandUsageState.QueryPreferences[cleanQuery]
-		pref[commandTitle] = (pref[commandTitle] or 0) + 1
-	end
-
-	bindStateSave(bindSnapshot())
 end
 
 local function addSectionHeader(title: string, layoutOrder: number)
@@ -425,24 +260,25 @@ local function renderCommands(query: string, isCommandSearch: boolean)
 
 	local rawMatches = {}
 	if isCommandSearch then
-		local searchStr = query:sub(2)
+		local searchStr = string.match(query:sub(2), "^%s*(.*)") or ""
 
 		for _, cmd in ipairs(commandFramework.GetCommands()) do
-			local matched, highlightedText, score = fuzzyMatch(cmd.Title, searchStr)
+			local matched, highlightedText, score = search.FuzzyMatch(cmd.Title, searchStr)
 
 			if matched then
-				local rankedScore = queryScore(cmd.Title, searchStr, score)
+				local rankedScore = search.QueryScore(cmd.Title, searchStr, score, commandUsageState)
 				table.insert(rawMatches, {
 					Title = highlightedText,
 					Score = rankedScore,
 					RawTitle = cmd.Title,
 					Icon = cmd.Icon,
 					Shortcut = cmd.Shortcut,
-					IsRecent = getRecentIndex(cmd.Title) ~= nil,
+					IsRecent = search.GetRecentIndex(cmd.Title, commandUsageState) ~= nil,
 					Group = cmd.Group or "Other",
 
 					OnTrigger = function()
-						rememberCommandChoice(cmd.Title, query)
+						search.RememberCommandChoice(cmd.Title, query, commandUsageState)
+						bindStateSave(bindSnapshot())
 						commandPalette.Visible = false
 						cmd.OnTrigger(cmd, cmd.Super)
 					end,
@@ -456,9 +292,9 @@ local function renderCommands(query: string, isCommandSearch: boolean)
 			local insts = instances.Search(searchStr)
 
 			for _, inst in ipairs(insts) do
-				local matched, highlightedText, score = fuzzyMatch(inst.Title, searchStr)
+				local matched, highlightedText, score = search.FuzzyMatch(inst.Title, searchStr)
 				if matched then
-					local rankedScore = queryScore(inst.Title, searchStr, score, false)
+					local rankedScore = search.QueryScore(inst.Title, searchStr, score, commandUsageState, false)
 					table.insert(rawMatches, {
 						Title = highlightedText,
 						Score = rankedScore,
@@ -484,7 +320,8 @@ local function renderCommands(query: string, isCommandSearch: boolean)
 	end)
 
 	local iterMatches = rawMatches
-	if isCommandSearch and query == ">" then
+	local cleanQuery = isCommandSearch and (string.match(query:sub(2), "^%s*(.*)") or "") or query
+	if isCommandSearch and cleanQuery == "" then
 		local recentMatches = {}
 		local otherMatches = {}
 		for _, data in ipairs(rawMatches) do
@@ -846,10 +683,11 @@ do
 
 		app:Notification({
 			App = "Comet",
+			AppIcon = "rbxassetid://109261725124277",
 
+			Icon = cascade.Symbols.command,
 			Title = `Palette loaded`,
 			Subtitle = `The command palette has loaded. Press \`{table.concat(paletteOpen, " + ")}\` to use it`,
-			Icon = cascade.Symbols.command,
 
 			Duration = 10,
 		})
