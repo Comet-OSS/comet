@@ -46,6 +46,10 @@ return function(self)
 			{
 				Title = "Disable",
 				OnTrigger = function(self, super)
+					if not super._originalProperties then
+						return
+					end
+ 
 					if super._connection then
 						super._connection:Disconnect()
 						super._connection = nil
