@@ -5,6 +5,7 @@
         "modules": "./src/modules",
         "ui": "./src/ui",
         "config": "./src/config",
-        "themes": "./src/ui/themes"
+        "themes": "./src/ui/themes",
+        "lune": "~/.lune/.typedefs/0.9.3/"
     }
 }
