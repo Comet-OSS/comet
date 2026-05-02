@@ -25,6 +25,7 @@ local commands = {
 local function regErr(self, info: string?, invocator: boolean?)
 	self.App:Notification({
 		App = "Comet",
+		AppIcon = "rbxassetid://109261725124277",
 
 		Title = "Command Registration",
 		Subtitle = `There was an error registering a {
