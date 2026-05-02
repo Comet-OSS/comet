@@ -53,9 +53,12 @@ function Commands.Register(command: Command, super: any?)
 			if app and app.Notification then
 				app:Notification({
 					App = "Comet",
+					AppIcon = "rbxassetid://109261725124277",
+
+					Icon = cascade.Symbols.command,
 					Title = `{command.Title}`,
 					Subtitle = `Error running command: {tostring(result)}`,
-					Icon = cascade.Symbols.command,
+
 					Duration = 5,
 				})
 			end
@@ -63,10 +66,13 @@ function Commands.Register(command: Command, super: any?)
 			if app and app.Notification then
 				app:Notification({
 					App = "Comet",
+					AppIcon = "rbxassetid://109261725124277",
+
+					Icon = cascade.Symbols.command,
 					Title = `{command.Title}`,
 					Subtitle = codeLabel and (codeLabel .. ": " .. (result.message or "Error"))
 						or (result.message or "Error running command"),
-					Icon = cascade.Symbols.command,
+
 					Duration = 5,
 				})
 			end
