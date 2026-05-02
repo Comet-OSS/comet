@@ -41,8 +41,11 @@ return function(cascade, app, window, root)
 				local function result(success, sub)
 					app:Notification({
 						App = "Comet",
+						AppIcon = "rbxassetid://109261725124277",
+
 						Title = success and "Save state cleared" or "Delete failed",
-						Subtitle = success and "All persisted configuration removed." or sub,
+						Subtitle = not success and sub,
+
 						Duration = 4,
 					})
 				end

@@ -8,6 +8,8 @@ local components = {
     ["TitledRow"] = require("@self/titledRow"),
     ["KeybindLabel"] = require("@self/keybindLabel"),
     ["KeystrokeField"] = require("@self/Keystroke Field"),
+    ["AboutPanel"] = require("@self/aboutPanel"),
+    ["ChangelogEntry"] = require("@self/changelogEntry"),
 }
 
 --// Publish

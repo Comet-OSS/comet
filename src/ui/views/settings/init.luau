@@ -31,31 +31,30 @@ return function(app: _types.App)
 
 	-- Build groups
 	do
-		local function tab(root, tabName, tabInfo)
+		local function tab(root, tabInfo)
 			local sharedTabs = utility.safePath(_P, "shared.Views.Settings.Tabs", true)
 			local tab = root:Tab({
 				Selected = tabInfo.Selected,
-				Title = tabName,
+				Title = tabInfo.Title,
 				Icon = tabInfo.Icon,
 			})
 			
-			sharedTabs[tabName] = tab
+			sharedTabs[tabInfo.Title] = tab
 			tabInfo.Build(cascade, app, window, tab)
 		end
 
-		for group, tabs in subitems do
-			if tabs.Build then
-				tab(window, group, tabs)
-
-			else
+		for _, group in subitems do
+			if group.Tabs then
 				local section = window:Section({
-					Title = group,
+					Title = group.Title,
 					Disclosure = false,
 				})
 
-				for tabName, tabInfo in tabs do
-					tab(section, tabName, tabInfo)
+				for _, tabInfo in group.Tabs do
+					tab(section, tabInfo)
 				end
+			else
+				tab(window, group)
 			end
 		end
 	end
