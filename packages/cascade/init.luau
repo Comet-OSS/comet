@@ -8,12 +8,14 @@
     @description A Luau UI library based on macOS Sequoia.
     @license MIT License
 
-    @buildDate "2026-04-25T18:04:59.112250600+00:00"
+    @buildDate "2026-05-01T23:45:53.248047300+00:00"
     @buildCfg "Release"
-    @buildVers "v1.3.0-unmarked"
+    @buildVers "v1.2.1"
 
     This file was automatically generated with darklua, it is not intended for manual editing.
 --]]
+
+__SH = { COMPINDEXES = {} }
 
 type ExpectedObject__DARKLUA_TYPE_a=((...any)->...any)|Instance|ServiceProvider
 type Instance__DARKLUA_TYPE_b={Name:string?,Parent:Instance__DARKLUA_TYPE_b?,
@@ -6724,11 +6726,16 @@ ScrollBarThickness=7,Size=UDim2.fromScale(1,1),f'UIListLayout'{Name=
 'UIListLayout',Padding=UDim.new(0,9),SortOrder=Enum.SortOrder.LayoutOrder},f
 'UIPadding'{Name='Margins',PaddingBottom=UDim.new(0,17),PaddingLeft=UDim.new(0,
 17),PaddingRight=UDim.new(0,17),PaddingTop=UDim.new(0,17)}})::ScrollingFrame
-local h=e.Wrap(c,{Parent=function(h)g.Page.Parent=h end},g.Page)h.Type='Page'h.
-Theme=b.Theme h.Structures={Page=g.Page}if b.__window then h.__window=b.__window
-end h.__container=g.Page.__instance or g.Page return h end end function a.o():
-typeof(b())local c=a.cache.o if not c then c={c=b()}a.cache.o=c end return c.c
-end end do local b=function()a.b()return function(b,c:
+local h=function()local h={}for i,j in ipairs(__SH.COMPINDEXES)do if j.Parent==g
+.Page.__instance then table.insert(h,j)end end for i,j in ipairs(h)do if j.Name
+=='PageSection'then local k,l=h[i-1],j:FindFirstChildOfClass'UIPadding'if l then
+if k and k.Name~='PageSection'then l.PaddingTop=UDim.new(0,18)else l.PaddingTop=
+UDim.new(0,0)end end end end end g.Page.ChildAdded:Connect(h)g.Page.ChildRemoved
+:Connect(h)h()local i=e.Wrap(c,{Parent=function(i)g.Page.Parent=i end},g.Page)i.
+Type='Page'i.Theme=b.Theme i.Structures=g if b.__window then i.__window=b.
+__window end i.__container=g.Page.__instance or g.Page return i end end function
+a.o():typeof(b())local c=a.cache.o if not c then c={c=b()}a.cache.o=c end return
+c.c end end do local b=function()a.b()return function(b,c:
 TabProperties__DARKLUA_TYPE_y):Tab__DARKLUA_TYPE_z local d,e,f=a.d(),a.c(),a.o()
 local g,h,i,j=d.Create,b.Type=='Window'and b or b.__window,b.Type=='Window'and b
 .Structures.SidebarList or b.Type=='Tab'and b.__instance.Parent or b.__instance
@@ -6777,23 +6784,14 @@ j.Title=j.Leading:FindFirstChild'Title'::TextLabel j.Symbol=j.Leading:
 FindFirstChild'Symbol'::ImageLabel j.Padding=j.Body:FindFirstChild'UIPadding'::
 UIPadding local k if c and c.Page then if type(c.Page)=='table'and c.Page.Type==
 'Page'then k=c.Page j.Page=k.Structures.Page else j.Page=c.Page end else k=f(b,c
-and c.PageProperties)j.Page=k.Structures.Page end j.Page=j.Page or(function()
-return e.Apply(c,g'ScrollingFrame'{Name='ContentList',AutomaticCanvasSize=Enum.
-AutomaticSize.Y,BackgroundColor3=Color3.fromRGB(255,255,255),
-BackgroundTransparency=1,BorderColor3=Color3.fromRGB(0,0,0),BorderSizePixel=0,
-CanvasSize=UDim2.new(),ClipsDescendants=false,ScrollBarImageColor3=Color3.
-fromRGB(0,0,0),ScrollBarImageTransparency=0.6,ScrollBarThickness=7,Size=UDim2.
-fromScale(1,1),g'UIListLayout'{Name='UIListLayout',Padding=UDim.new(0,9),
-SortOrder=Enum.SortOrder.LayoutOrder},g'UIPadding'{Name='Margins',PaddingBottom=
-UDim.new(0,17),PaddingLeft=UDim.new(0,17),PaddingRight=UDim.new(0,17),PaddingTop
-=UDim.new(0,17)}})::ScrollingFrame end)()local l l=e.Wrap(c,{Title=function(m:
-string)j.Title.Text=m end,Icon=function(m:string?)j.Symbol.Visible=m and true or
-false if m then j.Symbol.Image=m end end,Indentation=function(m:number)j.Padding
-.PaddingLeft+=UDim.new(0,(11*m))end,Selected=function(m:boolean)if m then for n,
-o:Tab__DARKLUA_TYPE_z in pairs(h.Tabs)do if o.__container==l.__container then
-continue end o.Selected=false end end j.Body.Transparency=m and b.Theme.Controls
-.SelectionFocused[2].Value or 1 j.Title.TextColor3=m and b.Theme.Text.
-SelectionPrimary[1].Value or b.Theme.Text.Primary[1].Value j.Title.
+and c.PageProperties)j.Page=k.Structures.Page end local l l=e.Wrap(c,{Title=
+function(m:string)j.Title.Text=m end,Icon=function(m:string?)j.Symbol.Visible=m
+and true or false if m then j.Symbol.Image=m end end,Indentation=function(m:
+number)j.Padding.PaddingLeft+=UDim.new(0,(11*m))end,Selected=function(m:boolean)
+if m then for n,o:Tab__DARKLUA_TYPE_z in pairs(h.Tabs)do if o.__container==l.
+__container then continue end o.Selected=false end end j.Body.Transparency=m and
+b.Theme.Controls.SelectionFocused[2].Value or 1 j.Title.TextColor3=m and b.Theme
+.Text.SelectionPrimary[1].Value or b.Theme.Text.Primary[1].Value j.Title.
 TextTransparency=m and b.Theme.Text.SelectionPrimary[2].Value or b.Theme.Text.
 Primary[2].Value j.Symbol.ImageColor3=m and b.Theme.Text.SelectionPrimary[1].
 Value or b.Theme.Controls.Selection[1].Value j.Symbol.ImageTransparency=m and b.
@@ -6835,30 +6833,27 @@ q():typeof(b())local c=a.cache.q if not c then c={c=b()}a.cache.q=c end return c
 .c end end do local b=function()a.b()return function(b,c:
 PageSectionProperties__DARKLUA_TYPE_I):PageSection__DARKLUA_TYPE_J local d,e,f=a
 .d(),a.c(),a.q()local g,h,i=d.Create,b.__container or b.__instance or b,f(b)c=c
-or{}c.Title=c.Title or'Title'local j,k=h:FindFirstChild'PageSections',true if
-not j then k=false j=g'Frame'{Name='PageSections',BackgroundTransparency=1,Size=
-UDim2.fromScale(1,0),AutomaticSize=Enum.AutomaticSize.Y,Parent=h,g'UIListLayout'
-{Name='UIListLayout',Padding=UDim.new(0,25),SortOrder=Enum.SortOrder.LayoutOrder
-}}end local l=g'Frame'{Name='PageSection',BackgroundTransparency=1,Size=UDim2.
-fromScale(1,0),AutomaticSize=Enum.AutomaticSize.Y,Parent=k and j or j.__instance
-,g'UIListLayout'{Name='UIListLayout',Padding=UDim.new(0,12),SortOrder=Enum.
-SortOrder.LayoutOrder}}i.Body.Parent=l.__instance i.Padding.PaddingLeft=UDim.
-new(0,8)i.Padding.PaddingRight=UDim.new(0,8)i.Title.FontFace=Font.new(i.Title.
-FontFace.Family,Enum.FontWeight.SemiBold)i.Body.LayoutOrder=-1 local m=e.Wrap(c,
-{Title=function(m:string)i.Title.Text=m end,Subtitle=function(m:string)i.
-Subtitle.Visible=true i.Subtitle.Text=m end},l)m.Type='PageSection'm.Theme=b.
-Theme m.Structures=i m.__container=l.__instance e.Apply(c,m)return m end end
-function a.r():typeof(b())local c=a.cache.r if not c then c={c=b()}a.cache.r=c
-end return c.c end end do local b=function()a.b()return function(b,c:
-Frame__DARKLUA_TYPE_g):Form__DARKLUA_TYPE_B local d,e=a.d(),a.c()local f,g,h,i,j
-=d.Create,b.__container or b.__instance or b,{},{},{}c=c or{}h.Body=e.Apply(c,f
-'Frame'{Name='Form',AutomaticSize=Enum.AutomaticSize.Y,BorderColor3=Color3.
-fromRGB(0,0,0),BorderSizePixel=0,Size=UDim2.fromScale(1,0),Parent=g,
-__dynamicKeys={BackgroundColor3=b.Theme.Controls.View[1],BackgroundTransparency=
-b.Theme.Controls.View[2]},f'UIListLayout'{Name='UIListLayout',SortOrder=Enum.
-SortOrder.LayoutOrder},f'UIPadding'{Name='Margins',PaddingLeft=UDim.new(0,10),
-PaddingRight=UDim.new(0,10)},f'UICorner'{Name='UICorner',CornerRadius=UDim.new(0
-,6)},f'UIStroke'{Name='UIStroke',ApplyStrokeMode=Enum.ApplyStrokeMode.Border,
+or{}c.Title=c.Title or'Title'local j=g'Frame'{Name='PageSection',
+BackgroundTransparency=1,Size=UDim2.fromScale(1,0),AutomaticSize=Enum.
+AutomaticSize.Y,Parent=h,g'UIListLayout'{Name='UIListLayout',Padding=UDim.new(0,
+12),SortOrder=Enum.SortOrder.LayoutOrder},g'UIPadding'{PaddingBottom=UDim.new(0,
+18)}}i.Body.Parent=j.__instance i.Padding.PaddingLeft=UDim.new(0,8)i.Padding.
+PaddingRight=UDim.new(0,8)i.Title.FontFace=Font.new(i.Title.FontFace.Family,Enum
+.FontWeight.SemiBold)i.Body.LayoutOrder=-1 local k=e.Wrap(c,{Title=function(k:
+string)i.Title.Text=k end,Subtitle=function(k:string)i.Subtitle.Visible=true i.
+Subtitle.Text=k end},j)k.Type='PageSection'k.Theme=b.Theme k.Structures=i k.
+__container=j.__instance e.Apply(c,k)return k end end function a.r():typeof(b())
+local c=a.cache.r if not c then c={c=b()}a.cache.r=c end return c.c end end do
+local b=function()a.b()return function(b,c:Frame__DARKLUA_TYPE_g):
+Form__DARKLUA_TYPE_B local d,e=a.d(),a.c()local f,g,h,i,j=d.Create,b.__container
+or b.__instance or b,{},{},{}c=c or{}h.Body=e.Apply(c,f'Frame'{Name='Form',
+AutomaticSize=Enum.AutomaticSize.Y,BorderColor3=Color3.fromRGB(0,0,0),
+BorderSizePixel=0,Size=UDim2.fromScale(1,0),Parent=g,__dynamicKeys={
+BackgroundColor3=b.Theme.Controls.View[1],BackgroundTransparency=b.Theme.
+Controls.View[2]},f'UIListLayout'{Name='UIListLayout',SortOrder=Enum.SortOrder.
+LayoutOrder},f'UIPadding'{Name='Margins',PaddingLeft=UDim.new(0,10),PaddingRight
+=UDim.new(0,10)},f'UICorner'{Name='UICorner',CornerRadius=UDim.new(0,6)},f
+'UIStroke'{Name='UIStroke',ApplyStrokeMode=Enum.ApplyStrokeMode.Border,
 __dynamicKeys={Color=b.Theme.Controls.ViewBorder[1],Transparency=b.Theme.
 Controls.ViewBorder[2]}}})::Frame local k=e.Wrap(c,{},h.Body)k.Type='Form'k.
 Theme=b.Theme k.Structures=h local l=function()for l,m in ipairs(j)do local n,o=
@@ -7585,7 +7580,7 @@ AutomaticSize=Enum.AutomaticSize.XY,BackgroundColor3=Color3.fromRGB(255,255,255)
 LayoutOrder=1,g'UIListLayout'{Name='UIListLayout',FillDirection=Enum.
 FillDirection.Horizontal,Padding=UDim.new(0,5),SortOrder=Enum.SortOrder.
 LayoutOrder,VerticalAlignment=Enum.VerticalAlignment.Center},g'ImageLabel'{Name=
-'Icon',BackgroundTransparency=1,LayoutOrder=1,Size=UDim2.fromOffset(13,13),
+'Icon',BackgroundTransparency=1,LayoutOrder=1,Size=UDim2.fromOffset(18,18),
 Visible=false,__dynamicKeys={ImageColor3=b.Theme.Text.Primary[1]},__contextKeys=
 {ImageTransparency=function()return d.Age>=(e-1)and 1 or b.Theme.Text.Primary[2]
 .Value end}},g'TextLabel'{Name='Title',AutomaticSize=Enum.AutomaticSize.Y,
@@ -7704,20 +7699,20 @@ g)and typeof(getmetatable(g))=='Instance')then h=g g=b.Wrap({},{},g)end if
 typeof(g)=='table'then if g.Type==nil then g.Type=d end if g.Theme==nil and f
 and f.Theme then g.Theme=f.Theme end end b.Apply(c,g)local i=h or(typeof(g)==
 'table'and pcall(function()return g.__instance end)and g.__instance)if i~=nil
-then return g,i end return g end end for e,f in pairs(c)do c[e]=d(e,f)end
-function c.register(e:string,f:(any,any)->any)c[e]=d(e,f)end return c end
-function a.L():typeof(b())local c=a.cache.L if not c then c={c=b()}a.cache.L=c
-end return c.c end end do local b=function()local b=a.d()local c=b.Value local d
-=function(d:Color3|string,e:number)local f=(typeof(d)=='Color3'and d)or(typeof(d
-)=='string'and Color3.fromHex(d))return{c(f),c(1-(e/100))}end return{_id='Dark',
-Text={Primary=d('FFFFFF',85),Secondary=d('FFFFFF',55),Tertiary=d('FFFFFF',25),
-Quaternary=d('FFFFFF',10),Quinary=d('FFFFFF',5),SelectionPrimary=d('FFFFFF',100)
-,PrimaryAccent=d('FFFFFF',38)},Accents={Red=d('FF453A',100)},Controls={
-Background=d('1C1C1E',100),View=d('1F1F21',100),ViewBorder=d('FFFFFF',5),
-WindowControlDisabled=d('000000',20),WindowControlIcon=d('000000',50),
-WindowControlStroke=d('FFFFFF',10),Exit=d('FF5F57',100),Minimize=d('FEBC2E',100)
-,Zoom=d('28C840',100),SwitchAccent=d('478CF6',100),Selection=d('007AFF',100),
-SelectionStroke=d('007AFF',60),SelectionFocused=d('0A82FF',100),
+then table.insert(__SH.COMPINDEXES,i)return g,i end return g end end for e,f in
+pairs(c)do c[e]=d(e,f)end function c.register(e:string,f:(any,any)->any)c[e]=d(e
+,f)end return c end function a.L():typeof(b())local c=a.cache.L if not c then c=
+{c=b()}a.cache.L=c end return c.c end end do local b=function()local b=a.d()
+local c=b.Value local d=function(d:Color3|string,e:number)local f=(typeof(d)==
+'Color3'and d)or(typeof(d)=='string'and Color3.fromHex(d))return{c(f),c(1-(e/100
+))}end return{_id='Dark',Text={Primary=d('FFFFFF',85),Secondary=d('FFFFFF',55),
+Tertiary=d('FFFFFF',25),Quaternary=d('FFFFFF',10),Quinary=d('FFFFFF',5),
+SelectionPrimary=d('FFFFFF',100),PrimaryAccent=d('FFFFFF',38)},Accents={Red=d(
+'FF453A',100)},Controls={Background=d('1C1C1E',100),View=d('1F1F21',100),
+ViewBorder=d('FFFFFF',5),WindowControlDisabled=d('FFFFFF',20),WindowControlIcon=
+d('000000',50),WindowControlStroke=d('FFFFFF',10),Exit=d('FF5F57',100),Minimize=
+d('FEBC2E',100),Zoom=d('28C840',100),SwitchAccent=d('478CF6',100),Selection=d(
+'007AFF',100),SelectionStroke=d('007AFF',60),SelectionFocused=d('0A82FF',100),
 SelectionFocusedAccent=d('FFFFFF',85),Sidebar=d('202023',84),Separator={
 Background=d('000000',50),Shadow=d('FFFFFF',0)},Titlebar=d('363636',100),
 TitlebarShadow={Background=d('000000',0),Color=c(ColorSequence.new{

@@ -18,7 +18,7 @@
 
 			"pipelineHooks": {
 				"preAllBuilds": {
-					"command": "lune run pipeline/scripts/gen_c-log.luau CHANGELOG.md packages/CHANGELOG.json"
+					"command": "lune run pipeline/scripts/get_packages.luau packages/ \n lune run pipeline/scripts/gen_c-log.luau CHANGELOG.md packages/CHANGELOG.json"
 				}
 			}
 		},
